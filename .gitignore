@@ -1,0 +1,16 @@
+﻿# CASU generated/runtime content
+logs/*
+!logs/.gitkeep
+
+temp/*
+!temp/.gitkeep
+
+release/*
+!release/.gitkeep
+
+archives/*
+!archives/.gitkeep
+
+bin/
+obj/
+.vs/
