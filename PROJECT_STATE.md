@@ -29,3 +29,19 @@ Current Blocker:
 
 Next Action:
 - Implement isolated Raw Input emergency-bypass component.
+
+## CASU_02B-R3D2
+State: IMPLEMENTED / RUNTIME TEST PENDING
+
+Implementation:
+- Win32 Raw Input keyboard registration
+- Physical device filtering: VID_1EA7 / PID_0169 / MI_00
+- Left Shift scan code: 0x2A
+- Key-down-only bypass triggering
+- One-shot latch prevents release/double triggering
+- No boot, firmware, driver, authentication, or startup integration changes
+
+Validation:
+- Static source validation: PASS
+- C# compilation validation: PASS
+- Physical runtime bypass test: PENDING
