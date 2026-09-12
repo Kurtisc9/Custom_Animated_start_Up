@@ -45,3 +45,21 @@ Validation:
 - Static source validation: PASS
 - C# compilation validation: PASS
 - Physical runtime bypass test: PENDING
+
+## CASU_02B-R3D3
+State: IMPLEMENTED / PHYSICAL RUNTIME TEST PENDING
+
+Runtime behavior:
+- Emergency bypass requests controlled CASU runtime exit.
+- Emergency bypass remains one-shot.
+- First runtime crash requests one CASU restart.
+- Second runtime crash requests safe fallback.
+- Restart count cannot exceed one.
+
+Safety boundary:
+- Windows startup integration remains unconfigured.
+- Windows sign-in runtime availability proof remains pending.
+- No boot configuration changes.
+- No authentication changes.
+- No firmware changes.
+- No driver changes.
