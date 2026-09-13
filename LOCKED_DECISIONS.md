@@ -29,3 +29,14 @@ No firmware modification.
 No boot-configuration modification.
 No driver modification.
 No credential interception.
+
+## CASU_02B-R3D17 Production Orchestrator Boundary
+
+- Source repository remains X:\03_Active_Projects\Custom_Animated_Start_Up.
+- Production binaries must use a machine-local installation path.
+- LocalSystem service UI in Session 0 is prohibited.
+- Interactive runtime must target an interactive Windows session.
+- Windows Service Control Manager owns service lifecycle.
+- Windows authentication remains authoritative.
+- Ctrl+Alt+Delete remains Windows-controlled.
+- No permanent CASU Windows integration may be installed without explicit KurtisC approval.

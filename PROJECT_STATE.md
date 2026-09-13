@@ -63,3 +63,43 @@ Safety boundary:
 - No authentication changes.
 - No firmware changes.
 - No driver changes.
+
+## CASU_02B-R3D17
+
+State: IMPLEMENTED / TESTED / PASS pending commit
+
+Canonical root:
+X:\03_Active_Projects\Custom_Animated_Start_Up
+
+Branch:
+phase-02b-r3d-emergency-bypass
+
+Base commit:
+217e48d856e28f0bdb949360821d1e11afc66e94
+
+Production orchestrator source:
+IMPLEMENTED
+
+Build script parser validation:
+PASS
+
+Production build smoke test:
+PASS
+
+Temporary SCM lifecycle validation:
+PASS
+
+LocalSystem Session 0 orchestration:
+PASS
+
+Interactive session launch:
+PASS
+
+Persistent Windows integration:
+NOT INSTALLED
+
+Permanent integration approval:
+REQUIRED FROM KURTISC
+
+Windows sign-in runtime proof:
+PENDING
