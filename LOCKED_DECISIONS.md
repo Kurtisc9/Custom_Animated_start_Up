@@ -69,3 +69,29 @@ AUTHORITATIVE
 
 Ctrl+Alt+Delete:
 WINDOWS CONTROLLED
+
+## CASU_02B-R3D19-R2 Corrected Persistent Integration Decision
+
+The inaccurate R3D19 PASS record from commit
+6e1da0f59c47e214432061937423114dbbdba5d4
+is superseded.
+
+Authoritative R3D19 state is determined by R3D19-R2 evidence.
+
+CASUOrchestrator:
+INSTALLED AND RUNNING
+
+Account:
+LocalSystem
+
+Session 0 interactive UI:
+PROHIBITED
+
+Windows authentication:
+AUTHORITATIVE
+
+Ctrl+Alt+Delete:
+WINDOWS CONTROLLED
+
+Windows sign-in runtime proof:
+PENDING

@@ -152,3 +152,26 @@ INSTALLED
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D19-R2 CORRECTION
+
+The earlier R3D19 PASS record at commit
+6e1da0f59c47e214432061937423114dbbdba5d4
+was invalid because service creation failed.
+
+R3D19-R2 supersedes that record.
+
+Persistent CASUOrchestrator:
+INSTALLED
+
+Service status:
+RUNNING
+
+Service account:
+LocalSystem
+
+Persistent runtime validation:
+PASS
+
+Windows sign-in runtime proof:
+PENDING
