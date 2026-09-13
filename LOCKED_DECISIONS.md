@@ -50,3 +50,22 @@ No credential interception.
 - Ctrl+Alt+Delete remains Windows-controlled.
 - Session 0 interactive UI remains prohibited.
 - Windows sign-in runtime proof remains pending.
+
+## CASU_02B-R3D19
+
+KurtisC-approved persistent CASU integration installed.
+
+CASUOrchestrator:
+INSTALLED
+
+Service account:
+LocalSystem
+
+Session 0 UI:
+PROHIBITED
+
+Windows authentication:
+AUTHORITATIVE
+
+Ctrl+Alt+Delete:
+WINDOWS CONTROLLED

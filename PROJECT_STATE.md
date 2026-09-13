@@ -132,3 +132,23 @@ PENDING
 
 Next gate:
 Explicit KurtisC approval for permanent CASU Windows integration.
+
+## CASU_02B-R3D19
+
+State:
+IMPLEMENTED → TESTED → PASS
+
+Persistent service:
+CASUOrchestrator
+
+Service status:
+RUNNING
+
+Service account:
+LocalSystem
+
+Windows integration:
+INSTALLED
+
+Windows sign-in runtime proof:
+PENDING
