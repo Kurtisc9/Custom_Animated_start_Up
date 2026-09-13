@@ -105,3 +105,13 @@ PENDING
 - Ctrl+Alt+Delete remains Windows-controlled.
 - Session 0 interactive UI remains prohibited.
 - Actual reboot/pre-sign-in behavior requires a separate validation gate.
+
+## CASU_02B-R3D21 Controlled Reboot Gate
+
+- Pre-reboot verification must pass before restart.
+- Emergency recovery script must remain available.
+- Windows authentication remains authoritative.
+- Ctrl+Alt+Delete remains Windows-controlled.
+- Session 0 interactive UI remains prohibited.
+- No Credential Provider, Winlogon Shell, Userinit, BCD, firmware, or driver modification is authorized.
+- Post-reboot evidence is required before sign-in runtime proof may be marked PASS.

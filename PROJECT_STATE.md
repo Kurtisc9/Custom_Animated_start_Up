@@ -192,3 +192,20 @@ FALSE
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D21
+
+State:
+READY FOR CONTROLLED REBOOT
+
+Pre-reboot verification:
+PASS
+
+Emergency recovery:
+READY
+
+Reboot performed:
+FALSE
+
+Windows sign-in runtime proof:
+PENDING
