@@ -95,3 +95,13 @@ WINDOWS CONTROLLED
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D20 Reboot Readiness
+
+- Persistent CASUOrchestrator must remain recoverable.
+- Emergency disable script is required before reboot validation.
+- R3D20 does not reboot Windows.
+- Windows authentication remains authoritative.
+- Ctrl+Alt+Delete remains Windows-controlled.
+- Session 0 interactive UI remains prohibited.
+- Actual reboot/pre-sign-in behavior requires a separate validation gate.

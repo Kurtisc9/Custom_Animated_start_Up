@@ -175,3 +175,20 @@ PASS
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D20
+
+State:
+IMPLEMENTED / TESTED / PASS pending commit
+
+Persistent integration:
+READY FOR CONTROLLED REBOOT VALIDATION
+
+Emergency recovery:
+READY
+
+Reboot performed:
+FALSE
+
+Windows sign-in runtime proof:
+PENDING
