@@ -40,3 +40,13 @@ No credential interception.
 - Windows authentication remains authoritative.
 - Ctrl+Alt+Delete remains Windows-controlled.
 - No permanent CASU Windows integration may be installed without explicit KurtisC approval.
+
+## CASU_02B-R3D18 Permanent Integration Approval Boundary
+
+- R3D17 production orchestrator baseline is validated.
+- Permanent CASU Windows service installation is not yet authorized.
+- CASUOrchestrator may be installed persistently only after explicit KurtisC approval.
+- Windows authentication remains authoritative.
+- Ctrl+Alt+Delete remains Windows-controlled.
+- Session 0 interactive UI remains prohibited.
+- Windows sign-in runtime proof remains pending.

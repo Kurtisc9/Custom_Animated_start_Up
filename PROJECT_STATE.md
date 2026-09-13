@@ -103,3 +103,32 @@ REQUIRED FROM KURTISC
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D18
+
+State:
+APPROVAL GATE READY
+
+Canonical root:
+X:\03_Active_Projects\Custom_Animated_Start_Up
+
+Base commit:
+c1bbd93be70e9e93338b7e41740c0d52cd03b491
+
+Permanent CASU service:
+NOT INSTALLED
+
+Windows integration:
+NOT INSTALLED
+
+Windows authentication:
+AUTHORITATIVE
+
+Ctrl+Alt+Delete:
+WINDOWS CONTROLLED
+
+Windows sign-in runtime proof:
+PENDING
+
+Next gate:
+Explicit KurtisC approval for permanent CASU Windows integration.
