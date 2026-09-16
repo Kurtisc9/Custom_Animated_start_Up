@@ -1,0 +1,46 @@
+﻿{
+    "ThemeId":  "neural-core",
+    "DisplayName":  "KurtisC Neural Core",
+    "WelcomeMessage":  "Welcome KurtisC",
+    "IdentityText":  "KurtisC",
+    "PrimaryDisplayPreference":  2,
+    "StartupVariant":  "Random",
+    "SuccessSequence":  "Random",
+    "AnimationIntensity":  "Cinematic",
+    "MultiDisplayMode":  "Unified",
+    "AudioEnabled":  false,
+    "RandomizationEnabled":  true,
+    "StartupStages":  [
+                          "WAKE",
+                          "CORE_FORMATION",
+                          "KURTISC_ASSEMBLY",
+                          "SYSTEM_INITIALIZATION",
+                          "CORE_ENTRY",
+                          "AUTH_TRANSITION",
+                          "SUCCESS_EXIT"
+                      ],
+    "SuccessSequences":  [
+                             "CORE_EXPLOSION_DISSOLVE",
+                             "SPACESHIP_TAKEOFF"
+                         ],
+    "AuthenticationVisual":  {
+                                 "AnimatedIdentity":  true,
+                                 "ShowProfilePicture":  false,
+                                 "CredentialSurface":  "HybridHolographicGlass",
+                                 "FailureEffect":  "RED_ENERGY_DISTURBANCE",
+                                 "WindowsAuthenticationOnly":  true,
+                                 "CaptureCredentials":  false
+                             },
+    "Randomization":  {
+                          "ParticleTrajectories":  true,
+                          "StarField":  true,
+                          "NeuralEnergyPattern":  true,
+                          "GalaxyAppearance":  true,
+                          "OrbitalRingMovement":  true,
+                          "SecondaryHudLayout":  true,
+                          "LightingVariation":  true,
+                          "CameraDrift":  true,
+                          "StartupVariant":  true,
+                          "SuccessSequence":  true
+                      }
+}
