@@ -209,3 +209,19 @@ FALSE
 
 Windows sign-in runtime proof:
 PENDING
+
+## CASU_02B-R3D22 — Post-Reboot Validation
+
+Status: TESTED -> PASS -> LOCKED
+
+- Controlled reboot: PASS
+- Persistent CASUOrchestrator after reboot: PASS
+- LocalSystem identity: PASS
+- Session 0 service boundary: PASS
+- Normal Windows sign-in: PASS
+- Windows authentication authoritative: PASS
+- Ctrl+Alt+Delete Windows-controlled: PASS
+- Elevated BCD read: PASS
+- BCD modification: NONE
+- Final validation: CASU_02B_R3D22_R3_ELEVATED_VALIDATION=PASS
+- Evidence: docs\CASU_02B_R3D22_POST_REBOOT_VALIDATION.md

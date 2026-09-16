@@ -115,3 +115,13 @@ PENDING
 - Session 0 interactive UI remains prohibited.
 - No Credential Provider, Winlogon Shell, Userinit, BCD, firmware, or driver modification is authorized.
 - Post-reboot evidence is required before sign-in runtime proof may be marked PASS.
+
+## CASU_02B-R3D22
+
+Status: TESTED -> PASS -> LOCKED
+
+The persistent CASUOrchestrator integration survived a controlled reboot while preserving Windows authentication, Winlogon/Userinit defaults, Ctrl+Alt+Delete ownership, and the Session 0 UI prohibition.
+
+Elevated BCD enumeration completed successfully with exit code 0 and no BCD modification.
+
+No additional R3D22 reboot is required.
