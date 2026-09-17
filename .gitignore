@@ -14,3 +14,5 @@ archives/*
 bin/
 obj/
 .vs/
+**/bin/
+**/obj/
