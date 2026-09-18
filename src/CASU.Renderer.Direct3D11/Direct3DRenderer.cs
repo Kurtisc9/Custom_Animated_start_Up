@@ -8,7 +8,7 @@ using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
-using static Vortice.D3DCompiler.D3DCompiler;
+using static Vortice.D3DCompiler.Compiler;
 using static Vortice.Direct3D11.D3D11;
 using static Vortice.DXGI.DXGI;
 
@@ -174,13 +174,27 @@ internal sealed class Direct3DRenderer : IDisposable
 
         string shaderSource = File.ReadAllText(shaderPath);
 
-        using CompilationResult vertexResult =
-            Compile(shaderSource, "VSMain", "vs_5_0");
+        ReadOnlyMemory<byte> vertexBytecode =
+            Compile(
+                shaderSource,
+                "VSMain",
+                shaderPath,
+                "vs_5_0",
+                ShaderFlags.None,
+                EffectFlags.None
+            );
 
-        using CompilationResult pixelResult =
-            Compile(shaderSource, "PSMain", "ps_5_0");
+        ReadOnlyMemory<byte> pixelBytecode =
+            Compile(
+                shaderSource,
+                "PSMain",
+                shaderPath,
+                "ps_5_0",
+                ShaderFlags.None,
+                EffectFlags.None
+            );
 
-        if (vertexResult.Bytecode is null || pixelResult.Bytecode is null)
+        if (vertexBytecode.IsEmpty || pixelBytecode.IsEmpty)
         {
             throw new InvalidOperationException(
                 "Neural Core shader compilation returned no bytecode."
@@ -188,11 +202,16 @@ internal sealed class Direct3DRenderer : IDisposable
         }
 
         _vertexShader =
-            _device.CreateVertexShader(vertexResult.Bytecode);
+            _device.CreateVertexShader(
+                vertexBytecode.Span,
+                null
+            );
 
         _pixelShader =
-            _device.CreatePixelShader(pixelResult.Bytecode);
-
+            _device.CreatePixelShader(
+                pixelBytecode.Span,
+                null
+            );
         var inputElements = new[]
         {
             new InputElementDescription(
@@ -207,22 +226,28 @@ internal sealed class Direct3DRenderer : IDisposable
         _inputLayout =
             _device.CreateInputLayout(
                 inputElements,
-                vertexResult.Bytecode
+                vertexBytecode.Span
             );
 
         _vertexBuffer =
             _device.CreateBuffer(
+                NeuralCoreGeometry.FullscreenQuad,
                 BindFlags.VertexBuffer,
-                NeuralCoreGeometry.FullscreenQuad
+                ResourceUsage.Default,
+                CpuAccessFlags.None,
+                ResourceOptionFlags.None,
+                0,
+                0
             );
-
         _constantBuffer =
-            _device.CreateBuffer<NeuralCoreSceneConstants>(
+            _device.CreateBuffer(
+                (uint)Marshal.SizeOf<NeuralCoreSceneConstants>(),
                 BindFlags.ConstantBuffer,
                 ResourceUsage.Dynamic,
-                CpuAccessFlags.Write
+                CpuAccessFlags.Write,
+                ResourceOptionFlags.None,
+                0
             );
-
         if (_vertexShader is null ||
             _pixelShader is null ||
             _inputLayout is null ||
@@ -302,21 +327,19 @@ internal sealed class Direct3DRenderer : IDisposable
                 aspect
             );
 
-        _context.Map(
-            _constantBuffer,
-            0,
-            MapMode.WriteDiscard,
-            MapFlags.None,
-            out MappedSubresource mapped
-        );
-
+        MappedSubresource mapped =
+            _context.Map(
+                _constantBuffer,
+                MapMode.WriteDiscard,
+                Vortice.Direct3D11.MapFlags.None
+            );
         Marshal.StructureToPtr(
             constants,
             mapped.DataPointer,
             false
         );
 
-        _context.Unmap(_constantBuffer, 0);
+        _context.Unmap(_constantBuffer);
 
         _context.RSSetViewport(
             new Viewport(
@@ -341,8 +364,8 @@ internal sealed class Direct3DRenderer : IDisposable
             )
         );
 
-        int stride = Marshal.SizeOf<NeuralCoreVertex>();
-        int offset = 0;
+        uint stride = (uint)Marshal.SizeOf<NeuralCoreVertex>();
+        uint offset = 0;
 
         _context.IASetInputLayout(_inputLayout);
         _context.IASetPrimitiveTopology(
