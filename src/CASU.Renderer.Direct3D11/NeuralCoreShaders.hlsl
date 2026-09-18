@@ -1,13 +1,8 @@
-﻿cbuffer SceneConstants : register(b0)
+cbuffer SceneConstants : register(b0)
 {
     float Time;
     float Aspect;
     float2 Padding;
-};
-
-struct VSInput
-{
-    float2 Position : POSITION;
 };
 
 struct VSOutput
@@ -16,16 +11,23 @@ struct VSOutput
     float2 UV       : TEXCOORD0;
 };
 
-VSOutput VSMain(VSInput input)
+VSOutput VSMain(uint vertexId : SV_VertexID)
 {
     VSOutput output;
 
-    output.Position =
-        float4(input.Position.xy, 0.0f, 1.0f);
+    float2 positions[6] =
+    {
+        float2(-1.0, -1.0),
+        float2(-1.0,  1.0),
+        float2( 1.0,  1.0),
+        float2(-1.0, -1.0),
+        float2( 1.0,  1.0),
+        float2( 1.0, -1.0)
+    };
 
-    output.UV =
-        (input.Position.xy * 0.5f) + 0.5f;
-
+    float2 position = positions[vertexId];
+    output.Position = float4(position, 0.0, 1.0);
+    output.UV = position * float2(0.5, -0.5) + 0.5;
     return output;
 }
 

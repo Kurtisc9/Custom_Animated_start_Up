@@ -212,33 +212,6 @@ internal sealed class Direct3DRenderer : IDisposable
                 pixelBytecode.Span,
                 null
             );
-        var inputElements = new[]
-        {
-            new InputElementDescription(
-                "POSITION",
-                0,
-                Format.R32G32_Float,
-                0,
-                0
-            )
-        };
-
-        _inputLayout =
-            _device.CreateInputLayout(
-                inputElements,
-                vertexBytecode.Span
-            );
-
-        _vertexBuffer =
-            _device.CreateBuffer(
-                NeuralCoreGeometry.FullscreenQuad,
-                BindFlags.VertexBuffer,
-                ResourceUsage.Default,
-                CpuAccessFlags.None,
-                ResourceOptionFlags.None,
-                0,
-                0
-            );
         _constantBuffer =
             _device.CreateBuffer(
                 (uint)Marshal.SizeOf<NeuralCoreSceneConstants>(),
@@ -250,8 +223,6 @@ internal sealed class Direct3DRenderer : IDisposable
             );
         if (_vertexShader is null ||
             _pixelShader is null ||
-            _inputLayout is null ||
-            _vertexBuffer is null ||
             _constantBuffer is null)
         {
             throw new InvalidOperationException(
@@ -309,8 +280,6 @@ internal sealed class Direct3DRenderer : IDisposable
             _swapChain is null ||
             _vertexShader is null ||
             _pixelShader is null ||
-            _inputLayout is null ||
-            _vertexBuffer is null ||
             _constantBuffer is null)
         {
             return;
@@ -364,28 +333,11 @@ internal sealed class Direct3DRenderer : IDisposable
             )
         );
 
-        uint stride = (uint)Marshal.SizeOf<NeuralCoreVertex>();
-        uint offset = 0;
-
-        _context.IASetInputLayout(_inputLayout);
-        _context.IASetPrimitiveTopology(
-            Vortice.Direct3D.PrimitiveTopology.TriangleList
-        );
-        _context.IASetVertexBuffer(
-            0,
-            _vertexBuffer,
-            stride,
-            offset
-        );
-
         _context.VSSetShader(_vertexShader);
         _context.PSSetShader(_pixelShader);
         _context.PSSetConstantBuffer(0, _constantBuffer);
 
-        _context.Draw(
-            NeuralCoreGeometry.VertexCount,
-            0
-        );
+        _context.Draw(6, 0);
 
         _swapChain.Present(
             1,
