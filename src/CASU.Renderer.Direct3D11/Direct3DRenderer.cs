@@ -1,9 +1,14 @@
-﻿using System;
+using System;
+using System.IO;
+using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Vortice.D3DCompiler;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
+using static Vortice.D3DCompiler.D3DCompiler;
 using static Vortice.Direct3D11.D3D11;
 using static Vortice.DXGI.DXGI;
 
@@ -19,14 +24,19 @@ internal sealed class Direct3DRenderer : IDisposable
     private IDXGISwapChain1? _swapChain;
     private ID3D11RenderTargetView? _renderTarget;
 
+    private ID3D11VertexShader? _vertexShader;
+    private ID3D11PixelShader? _pixelShader;
+    private ID3D11InputLayout? _inputLayout;
+    private ID3D11Buffer? _vertexBuffer;
+    private ID3D11Buffer? _constantBuffer;
+
     private bool _disposed;
 
     public FeatureLevel FeatureLevel { get; private set; }
 
     public Direct3DRenderer(Form window)
     {
-        _window = window ??
-            throw new ArgumentNullException(nameof(window));
+        _window = window ?? throw new ArgumentNullException(nameof(window));
     }
 
     public void Initialize()
@@ -50,17 +60,12 @@ internal sealed class Direct3DRenderer : IDisposable
                 out ID3D11DeviceContext context
             );
 
-        Console.WriteLine(
-            $"D3D11_DEVICE_HRESULT=0x{deviceResult.Code:X8}"
-        );
+        Console.WriteLine($"D3D11_DEVICE_HRESULT=0x{deviceResult.Code:X8}");
 
-        if (deviceResult.Failure ||
-            device is null ||
-            context is null)
+        if (deviceResult.Failure || device is null || context is null)
         {
             device?.Dispose();
             context?.Dispose();
-
             throw new InvalidOperationException(
                 $"D3D11CreateDevice failed: 0x{deviceResult.Code:X8}"
             );
@@ -77,18 +82,13 @@ internal sealed class Direct3DRenderer : IDisposable
 
         if (_factory is null)
         {
-            throw new InvalidOperationException(
-                "CreateDXGIFactory2 returned null."
-            );
+            throw new InvalidOperationException("CreateDXGIFactory2 returned null.");
         }
 
         Console.WriteLine("DXGI_FACTORY_CREATE=PASS");
 
-        uint width =
-            (uint)Math.Max(1, _window.ClientSize.Width);
-
-        uint height =
-            (uint)Math.Max(1, _window.ClientSize.Height);
+        uint width = (uint)Math.Max(1, _window.ClientSize.Width);
+        uint height = (uint)Math.Max(1, _window.ClientSize.Height);
 
         var description =
             new SwapChainDescription1
@@ -117,25 +117,23 @@ internal sealed class Direct3DRenderer : IDisposable
 
         if (_swapChain is null)
         {
-            throw new InvalidOperationException(
-                "CreateSwapChainForHwnd returned null."
-            );
+            throw new InvalidOperationException("CreateSwapChainForHwnd returned null.");
         }
 
         Console.WriteLine("DIRECT3D11_SWAPCHAIN_CREATE=PASS");
 
         CreateRenderTarget();
-
         Console.WriteLine("DIRECT3D11_RENDER_TARGET_CREATE=PASS");
+
+        CreateNeuralCorePipeline();
+        Console.WriteLine("NEURAL_CORE_GPU_PIPELINE_CREATE=PASS");
     }
 
     private void CreateRenderTarget()
     {
         if (_swapChain is null || _device is null)
         {
-            throw new InvalidOperationException(
-                "Renderer is not initialized."
-            );
+            throw new InvalidOperationException("Renderer is not initialized.");
         }
 
         _renderTarget?.Dispose();
@@ -144,8 +142,7 @@ internal sealed class Direct3DRenderer : IDisposable
         using ID3D11Texture2D backBuffer =
             _swapChain.GetBuffer<ID3D11Texture2D>(0);
 
-        _renderTarget =
-            _device.CreateRenderTargetView(backBuffer);
+        _renderTarget = _device.CreateRenderTargetView(backBuffer);
 
         if (_renderTarget is null)
         {
@@ -153,6 +150,95 @@ internal sealed class Direct3DRenderer : IDisposable
                 "Render-target creation returned null."
             );
         }
+    }
+
+    private void CreateNeuralCorePipeline()
+    {
+        if (_device is null)
+        {
+            throw new InvalidOperationException("Renderer device is not initialized.");
+        }
+
+        string shaderPath = Path.Combine(
+            AppContext.BaseDirectory,
+            "NeuralCoreShaders.hlsl"
+        );
+
+        if (!File.Exists(shaderPath))
+        {
+            throw new FileNotFoundException(
+                "Neural Core shader source was not found.",
+                shaderPath
+            );
+        }
+
+        string shaderSource = File.ReadAllText(shaderPath);
+
+        using CompilationResult vertexResult =
+            Compile(shaderSource, "VSMain", "vs_5_0");
+
+        using CompilationResult pixelResult =
+            Compile(shaderSource, "PSMain", "ps_5_0");
+
+        if (vertexResult.Bytecode is null || pixelResult.Bytecode is null)
+        {
+            throw new InvalidOperationException(
+                "Neural Core shader compilation returned no bytecode."
+            );
+        }
+
+        _vertexShader =
+            _device.CreateVertexShader(vertexResult.Bytecode);
+
+        _pixelShader =
+            _device.CreatePixelShader(pixelResult.Bytecode);
+
+        var inputElements = new[]
+        {
+            new InputElementDescription(
+                "POSITION",
+                0,
+                Format.R32G32_Float,
+                0,
+                0
+            )
+        };
+
+        _inputLayout =
+            _device.CreateInputLayout(
+                inputElements,
+                vertexResult.Bytecode
+            );
+
+        _vertexBuffer =
+            _device.CreateBuffer(
+                BindFlags.VertexBuffer,
+                NeuralCoreGeometry.FullscreenQuad
+            );
+
+        _constantBuffer =
+            _device.CreateBuffer<NeuralCoreSceneConstants>(
+                BindFlags.ConstantBuffer,
+                ResourceUsage.Dynamic,
+                CpuAccessFlags.Write
+            );
+
+        if (_vertexShader is null ||
+            _pixelShader is null ||
+            _inputLayout is null ||
+            _vertexBuffer is null ||
+            _constantBuffer is null)
+        {
+            throw new InvalidOperationException(
+                "Neural Core GPU pipeline resource creation failed."
+            );
+        }
+
+        Console.WriteLine("HLSL_VERTEX_SHADER_COMPILE=PASS");
+        Console.WriteLine("HLSL_PIXEL_SHADER_COMPILE=PASS");
+        Console.WriteLine("GPU_VERTEX_BUFFER_CREATE=PASS");
+        Console.WriteLine("GPU_CONSTANT_BUFFER_CREATE=PASS");
+        Console.WriteLine("GPU_INPUT_LAYOUT_CREATE=PASS");
     }
 
     public void Resize()
@@ -195,28 +281,87 @@ internal sealed class Direct3DRenderer : IDisposable
     {
         if (_context is null ||
             _renderTarget is null ||
-            _swapChain is null)
+            _swapChain is null ||
+            _vertexShader is null ||
+            _pixelShader is null ||
+            _inputLayout is null ||
+            _vertexBuffer is null ||
+            _constantBuffer is null)
         {
             return;
         }
 
-        float pulse =
-            0.5f +
-            (0.5f * MathF.Sin(time * 2.0f));
+        uint width = (uint)Math.Max(1, _window.ClientSize.Width);
+        uint height = (uint)Math.Max(1, _window.ClientSize.Height);
 
-        var clearColor =
-            new Color4(
-                0.005f + (0.01f * pulse),
-                0.02f  + (0.06f * pulse),
-                0.08f  + (0.12f * pulse),
-                1.0f
+        float aspect = width / (float)height;
+
+        var constants =
+            new NeuralCoreSceneConstants(
+                time,
+                aspect
             );
+
+        _context.Map(
+            _constantBuffer,
+            0,
+            MapMode.WriteDiscard,
+            MapFlags.None,
+            out MappedSubresource mapped
+        );
+
+        Marshal.StructureToPtr(
+            constants,
+            mapped.DataPointer,
+            false
+        );
+
+        _context.Unmap(_constantBuffer, 0);
+
+        _context.RSSetViewport(
+            new Viewport(
+                0,
+                0,
+                width,
+                height,
+                0.0f,
+                1.0f
+            )
+        );
 
         _context.OMSetRenderTargets(_renderTarget);
 
         _context.ClearRenderTargetView(
             _renderTarget,
-            clearColor
+            new Color4(
+                0.002f,
+                0.004f,
+                0.015f,
+                1.0f
+            )
+        );
+
+        int stride = Marshal.SizeOf<NeuralCoreVertex>();
+        int offset = 0;
+
+        _context.IASetInputLayout(_inputLayout);
+        _context.IASetPrimitiveTopology(
+            Vortice.Direct3D.PrimitiveTopology.TriangleList
+        );
+        _context.IASetVertexBuffer(
+            0,
+            _vertexBuffer,
+            stride,
+            offset
+        );
+
+        _context.VSSetShader(_vertexShader);
+        _context.PSSetShader(_pixelShader);
+        _context.PSSetConstantBuffer(0, _constantBuffer);
+
+        _context.Draw(
+            NeuralCoreGeometry.VertexCount,
+            0
         );
 
         _swapChain.Present(
@@ -227,7 +372,8 @@ internal sealed class Direct3DRenderer : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) {
+        if (_disposed)
+        {
             return;
         }
 
@@ -239,11 +385,23 @@ internal sealed class Direct3DRenderer : IDisposable
             _context.Flush();
         }
 
+        _constantBuffer?.Dispose();
+        _vertexBuffer?.Dispose();
+        _inputLayout?.Dispose();
+        _pixelShader?.Dispose();
+        _vertexShader?.Dispose();
+
         _renderTarget?.Dispose();
         _swapChain?.Dispose();
         _factory?.Dispose();
         _context?.Dispose();
         _device?.Dispose();
+
+        _constantBuffer = null;
+        _vertexBuffer = null;
+        _inputLayout = null;
+        _pixelShader = null;
+        _vertexShader = null;
 
         _renderTarget = null;
         _swapChain = null;
@@ -251,8 +409,6 @@ internal sealed class Direct3DRenderer : IDisposable
         _context = null;
         _device = null;
 
-        Console.WriteLine(
-            "DIRECT3D11_RENDERER_DISPOSE=PASS"
-        );
+        Console.WriteLine("DIRECT3D11_RENDERER_DISPOSE=PASS");
     }
 }
