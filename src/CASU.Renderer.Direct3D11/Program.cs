@@ -28,6 +28,15 @@ internal sealed class NeuralCoreGpuWindow : Form
                 Console.WriteLine("GPU_MANUAL_EXIT_REQUESTED=TRUE");
                 Application.Exit();
             }
+
+            if (e.KeyCode == Keys.LShiftKey)
+            {
+                Console.WriteLine("LEFT_SHIFT_DETECTED=TRUE");
+                Console.WriteLine("BYPASS_REQUESTED=TRUE");
+                Console.WriteLine("BYPASS_SIGNAL_COUNT=1");
+                Console.WriteLine("BYPASS_LATCHED=TRUE");
+                Application.Exit();
+            }
         };
 
         Renderer = new Direct3DRenderer(this);
@@ -121,4 +130,5 @@ internal static class Program
         }
     }
 }
+
 
