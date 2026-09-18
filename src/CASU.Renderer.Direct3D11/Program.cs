@@ -19,6 +19,16 @@ internal sealed class NeuralCoreGpuWindow : Form
         ShowInTaskbar = false;
         TopMost = true;
         BackColor = Color.Black;
+        KeyPreview = true;
+
+        KeyDown += (_, e) =>
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                Console.WriteLine("GPU_MANUAL_EXIT_REQUESTED=TRUE");
+                Application.Exit();
+            }
+        };
 
         Renderer = new Direct3DRenderer(this);
     }
@@ -111,3 +121,4 @@ internal static class Program
         }
     }
 }
+
