@@ -1,92 +1,113 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CASU.Renderer.Direct3D11;
 
+internal sealed class NeuralCoreGpuWindow : Form
+{
+    public Direct3DRenderer Renderer { get; }
+
+    public NeuralCoreGpuWindow(Rectangle bounds)
+    {
+        Bounds = bounds;
+        StartPosition = FormStartPosition.Manual;
+        FormBorderStyle = FormBorderStyle.None;
+        ShowInTaskbar = false;
+        TopMost = true;
+        BackColor = Color.Black;
+
+        Renderer = new Direct3DRenderer(this);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            Renderer.Dispose();
+
+        base.Dispose(disposing);
+    }
+}
+
 internal static class Program
 {
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
-        Console.WriteLine("CASU_DIRECT3D11_RENDERER_CORE_TEST=START");
+        Console.WriteLine("CASU_GPU_PRESENTATION_RUNTIME=START");
 
         ApplicationConfiguration.Initialize();
 
-        using var window = new Form
-        {
-            Text = "CASU Neural Core — Direct3D Foundation",
-            ClientSize = new Size(1280, 720),
-            StartPosition = FormStartPosition.CenterScreen,
-            BackColor = Color.Black
-        };
+        Screen[] screens = Screen.AllScreens;
 
-        using var renderer =
-            new Direct3DRenderer(window);
+        if (screens == null || screens.Length == 0)
+        {
+            Console.WriteLine("DISPLAY_DISCOVERY=FAIL");
+            return 2;
+        }
+
+        int focalIndex = screens.Length >= 2 ? 1 : 0;
+
+        Console.WriteLine($"DISPLAY_COUNT={screens.Length}");
+        Console.WriteLine($"CASU_PRIMARY_DISPLAY=DISPLAY_{focalIndex + 1}");
+
+        var windows = new List<NeuralCoreGpuWindow>();
 
         try
         {
-            window.Show();
+            for (int i = 0; i < screens.Length; i++)
+            {
+                var window =
+                    new NeuralCoreGpuWindow(screens[i].Bounds);
 
-            renderer.Initialize();
+                windows.Add(window);
 
-            Console.WriteLine("DIRECT3D11_RENDERER_INITIALIZE=PASS");
+                window.Show();
+                window.Renderer.Initialize();
 
-            var stopwatch = Stopwatch.StartNew();
+                Console.WriteLine(
+                    $"DISPLAY_{i + 1}_GPU_INITIALIZE=PASS");
+            }
 
-            bool resizeExecuted = false;
+            var clock = Stopwatch.StartNew();
 
-            while (window.Created &&
-                   stopwatch.Elapsed.TotalSeconds < 6.0)
+            while (windows.Any(w => w.Created))
             {
                 Application.DoEvents();
 
                 float seconds =
-                    (float)stopwatch.Elapsed.TotalSeconds;
+                    (float)clock.Elapsed.TotalSeconds;
 
-                renderer.Render(seconds);
-
-                if (!resizeExecuted &&
-                    stopwatch.Elapsed.TotalSeconds >= 2.0)
+                foreach (var window in windows)
                 {
-                    window.ClientSize =
-                        new Size(1024, 640);
-
-                    renderer.Resize();
-
-                    resizeExecuted = true;
+                    if (window.Created)
+                        window.Renderer.Render(seconds);
                 }
 
                 System.Threading.Thread.Sleep(1);
             }
 
-            Console.WriteLine("DIRECT3D11_FRAME_LOOP=PASS");
-
-            if (!resizeExecuted)
-            {
-                Console.WriteLine("DIRECT3D11_RESIZE_TEST=FAIL");
-                return 2;
-            }
-
-            Console.WriteLine("DIRECT3D11_RESIZE_TEST=PASS");
-
-            window.Close();
-
-            Application.DoEvents();
-
-            Console.WriteLine("DIRECT3D11_WINDOW_EXIT=PASS");
-            Console.WriteLine("CASU_DIRECT3D11_RENDERER_CORE_TEST=PASS");
-
+            Console.WriteLine("GPU_FRAME_LOOP=PASS");
+            Console.WriteLine("CASU_GPU_PRESENTATION_RUNTIME=PASS");
             return 0;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("CASU_DIRECT3D11_RENDERER_CORE_TEST=FAIL");
+            Console.WriteLine("CASU_GPU_PRESENTATION_RUNTIME=FAIL");
             Console.WriteLine($"ERROR_TYPE={ex.GetType().FullName}");
             Console.WriteLine($"ERROR_MESSAGE={ex.Message}");
-
             return 1;
+        }
+        finally
+        {
+            foreach (var window in windows)
+            {
+                if (!window.IsDisposed)
+                    window.Dispose();
+            }
         }
     }
 }
